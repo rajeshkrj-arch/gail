@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="GAIL">
+  <circle cx="128" cy="128" r="120" fill="#FFD94F" stroke="#E63746" stroke-width="10"/>
+  <text x="128" y="52" text-anchor="middle" font-family="Noto Sans Devanagari, serif" font-size="26" font-weight="700" fill="#1a1a1a">गेल</text>
+  <path
+    d="M176 112c-6-24-26-42-52-42-32 0-56 24-56 58s24 58 56 58c24 0 44-14 52-36"
+    fill="none"
+    stroke="#1a1a1a"
+    stroke-width="24"
+    stroke-linecap="butt"
+    stroke-linejoin="round"
+  />
+  <path d="M124 132h56" stroke="#1a1a1a" stroke-width="18" stroke-linecap="square"/>
+  <g transform="translate(158 74) rotate(-20)">
+    <rect width="44" height="11" rx="1" fill="#E63746"/>
+    <rect x="7" y="16" width="44" height="11" rx="1" fill="#E63746"/>
+    <rect x="14" y="32" width="44" height="11" rx="1" fill="#E63746"/>
+  </g>
+  <text x="128" y="228" text-anchor="middle" font-family="Rajdhani, Arial Black, sans-serif" font-size="26" font-weight="700" fill="#1a1a1a" letter-spacing="5">GAIL</text>
+</svg>

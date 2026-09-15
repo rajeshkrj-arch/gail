@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "GAIL Energy Connect",
+      "hasCanvas": false,
+      "bodyTextLen": 269,
+      "bodyTextHash": "0614f2bfb682898310c150e3772ac996bc16d6a74b6a7b841e06391e14fcfbb0",
+      "bodyTextPrefix": "GAIL Energy Connect JODO PIPELINE. JAGAO SHEHAR. EASTERN INDIA N",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "GAIL Energy Connect",
+      "hasCanvas": false,
+      "bodyTextLen": 269,
+      "bodyTextHash": "0614f2bfb682898310c150e3772ac996bc16d6a74b6a7b841e06391e14fcfbb0",
+      "bodyTextPrefix": "GAIL Energy Connect JODO PIPELINE. JAGAO SHEHAR. EASTERN INDIA N",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
