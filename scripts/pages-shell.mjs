@@ -32,7 +32,8 @@ const html = `<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@600;700&family=Outfit:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap" />
 </head>
-<body>
+<body style="margin:0;background:#07090e">
+  <div id="root"></div>
   <script type="module" src="${base}/assets/${js}"></script>
 </body>
 </html>

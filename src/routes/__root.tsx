@@ -33,18 +33,27 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  component: () => (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <HeadContent />
-      </head>
-      <body>
+  component: () => {
+    const spa = typeof document !== "undefined" && document.getElementById("root");
+    const inner = (
+      <>
         <PreviewHostBridge />
         <AuthProvider>
           <Outlet />
         </AuthProvider>
-        <Scripts />
-      </body>
-    </html>
-  ),
+      </>
+    );
+    if (spa) return inner;
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <HeadContent />
+        </head>
+        <body>
+          {inner}
+          <Scripts />
+        </body>
+      </html>
+    );
+  },
 });
