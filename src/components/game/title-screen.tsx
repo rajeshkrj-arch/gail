@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Wordmark } from "./logo";
 import { useGame } from "@/lib/game/store";
 import { unlockAudio } from "@/lib/game/audio";
+import { asset } from "@/lib/asset";
 
 export function TitleScreen() {
   const setScreen = useGame((s) => s.setScreen);
@@ -11,7 +12,7 @@ export function TitleScreen() {
   return (
     <section className="relative flex h-full min-h-0 flex-col overflow-hidden">
       <img
-        src="/hero-map.jpg"
+        src={asset("/hero-map.jpg")}
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
         crossOrigin="anonymous"

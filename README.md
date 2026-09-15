@@ -7,7 +7,11 @@ Connect sections of the JHBDPL / Pradhan Mantri Urja Ganga corridor, watch CGD c
 
 ## Play
 
-This is a Progressive Web App — open it in a mobile browser, tap **Start connecting**, and it can be added to the home screen. No app store.
+**[Play GAIL Energy Connect](https://rajeshkrj-arch.github.io/gail/)**
+
+Open it on a phone, tap **Start connecting**, and add it to the home screen. No app store.
+
+GitHub Pages hosts the playable game. The weekly leaderboard needs the Grok/Vercel deploy (server database); scores still save on the device.
 
 ## Loop
 

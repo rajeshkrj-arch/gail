@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
+import { asset } from "@/lib/asset";
 
 export function GailMark({ className }: { className?: string }) {
   return (
     <img
-      src="/gail-logo.svg"
+      src={asset("/gail-logo.svg")}
       alt="GAIL"
       className={cn("select-none", className)}
       draggable={false}

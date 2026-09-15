@@ -307,6 +307,25 @@ export function pathD(a: MapNode, b: MapNode): string {
   return `M ${a.x} ${a.y} Q ${mx + nx} ${my + ny} ${b.x} ${b.y}`;
 }
 
+export const NODE_LIST = Object.values(NODES);
+
+export const SLOT_DRAW = SLOTS.map((slot) => {
+  const a = node(slot.from);
+  const b = node(slot.to);
+  return {
+    slot,
+    a,
+    b,
+    mid: midpoint(a, b),
+    d: pathD(a, b),
+    extras: (slot.extraPaths ?? []).map(([fa, tb]) => ({
+      key: `${fa}-${tb}`,
+      d: pathD(node(fa), node(tb)),
+    })),
+  };
+});
+
+
 export const LAND_PATH =
   "M64 36C108 6 178 2 236 16C292 30 338 62 352 108C366 152 360 196 352 236C360 276 372 318 362 356C352 396 328 428 286 444C236 462 186 454 146 430C108 408 86 370 78 328C70 286 58 250 64 210C70 166 52 118 64 36Z";
 

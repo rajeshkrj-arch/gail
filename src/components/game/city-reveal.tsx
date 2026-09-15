@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { CITY_BY_ID } from "@/lib/game/data";
 import { useGame } from "@/lib/game/store";
+import { asset } from "@/lib/asset";
 
 const ICONS = {
   auto: Bike,
@@ -64,13 +65,13 @@ export function CityReveal() {
       <div className="stagger-in w-full max-w-md overflow-hidden rounded-xl border border-border bg-surface shadow-panel">
         <div className="relative aspect-16/9 overflow-hidden">
           <img
-            src="/cities/dark.jpg"
+            src={asset("/cities/dark.jpg")}
             alt=""
             className="absolute inset-0 h-full w-full object-cover opacity-80"
             crossOrigin="anonymous"
           />
           <img
-            src={city.image}
+            src={asset(city.image)}
             alt=""
             className="absolute inset-0 h-full w-full object-cover animate-[reveal-up_500ms_ease-out]"
             crossOrigin="anonymous"
