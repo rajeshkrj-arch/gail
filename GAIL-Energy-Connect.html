@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#07090e"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>GAIL Energy Connect — Jodo Pipeline. Jagao Shehar.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@700&family=Outfit:wght@400;500;600&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#07090e;--surface:#12151c;--elevated:#1a1f2a;--fg:#f4f0e6;--muted:#8b93a1;
+  --subtle:#5c6573;--gold:#ffd94f;--gold-fg:#1a1403;--signal:#e63746;--land:#141a24;
+  --pipe:#ffd94f;--pipe-dim:#3d3824;--city-off:#2a3140;
+  --safe-t:max(1rem,env(safe-area-inset-top));--safe-b:max(1rem,env(safe-area-inset-bottom));
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
+  font-family:Outfit,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.5}
+.wrap{max-width:28rem;margin:0 auto;height:100%;position:relative;overflow:hidden;background:var(--bg)}
+h1,h2,.display{font-family:Rajdhani,Outfit,sans-serif;letter-spacing:-.03em;margin:0}
+.kicker{font-family:Rajdhani,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.muted{color:var(--muted)} .subtle{color:var(--subtle)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:var(--safe-t) 1.25rem var(--safe-b)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:2.75rem;padding:0 1.1rem;
+  border:0;border-radius:.5rem;background:var(--gold);color:var(--gold-fg);font-weight:600;width:100%}
+.btn.sec{background:var(--elevated);color:var(--fg);border:1px solid #ffffff14}
+.btn.ghost{background:transparent;color:var(--muted);border:0;height:2.5rem}
+.btn.lg{height:3.25rem;font-size:1.05rem}
+.card{border:1px solid #ffffff14;background:var(--surface);border-radius:.75rem;padding:.9rem 1rem;text-align:left;width:100%}
+.hero{position:absolute;inset:0;background:
+  radial-gradient(120% 80% at 70% 20%,#ffd94f22,transparent 50%),
+  linear-gradient(180deg,#07090ecc 10%,#07090ee8 100%),
+  repeating-linear-gradient(115deg,transparent 0 18px,#ffd94f08 18px 19px);
+  pointer-events:none}
+.logo{width:3.5rem;height:3.5rem;flex-shrink:0}
+.row{display:flex;align-items:center;gap:.75rem}
+.stack{display:flex;flex-direction:column;gap:.5rem}
+.hide{display:none !important}
+#mapbox{flex:1;min-height:0;position:relative}
+svg.map{width:100%;height:100%;display:block}
+.hud{display:flex;justify-content:space-between;gap:.75rem;padding-top:.25rem}
+.meter{height:.35rem;background:#ffffff12;border-radius:99px;overflow:hidden}
+.meter>i{display:block;height:100%;background:var(--gold);width:0;transition:width .4s}
+.tray{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;padding:.6rem 0 var(--safe-b)}
+.piece{height:4.4rem;border-radius:.6rem;border:1px solid #ffffff18;background:var(--surface);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;color:var(--fg)}
+.piece.on{border-color:var(--gold);background:#ffd94f18;box-shadow:0 0 0 1px var(--gold)}
+.piece svg{width:36px;height:22px}
+.piece small{font-size:.62rem;letter-spacing:.04em;color:var(--muted)}
+.toast{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+  background:#ffd94f;color:#1a1403;font-family:Rajdhani,sans-serif;font-weight:700;
+  letter-spacing:.12em;padding:.45rem .9rem;border-radius:.4rem;pointer-events:none;z-index:5}
+.overlay{position:absolute;inset:0;background:#07090ef2;z-index:8;display:flex;flex-direction:column;padding:1.25rem}
+.cityart{height:42%;border-radius:.8rem;overflow:hidden;position:relative;background:#0c1018}
+.cityart .sky{position:absolute;inset:0;background:linear-gradient(#1a2233,#0b0e14)}
+.cityart .glow{position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(transparent,#ffd94f33)}
+.stat{border:1px solid #ffffff14;background:var(--surface);border-radius:.6rem;padding:.75rem}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pulse{50%{opacity:.4}}
+.ghost{animation:pulse 1.2s ease-in-out infinite}
+select{height:2.75rem;flex:1;border-radius:.5rem;border:1px solid #ffffff22;background:var(--elevated);color:var(--fg);padding:0 .75rem}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const CDN="https://rajeshkrj-arch.github.io/gail";
+const VIEW={w:400,h:500};
+const NODES={
+  jagdishpur:{id:"jagdishpur",x:168,y:32,label:"Jagdishpur",kind:"hub"},
+  varanasi:{id:"varanasi",x:180,y:86,label:"Varanasi",kind:"city",cityId:"varanasi"},
+  patna:{id:"patna",x:238,y:108,label:"Patna",kind:"city",cityId:"patna",lx:16,ly:-6},
+  bokaro:{id:"bokaro",x:214,y:168,label:"Bokaro",kind:"hub"},
+  ranchi:{id:"ranchi",x:126,y:204,label:"Ranchi",kind:"city",cityId:"ranchi",lx:-10},
+  jamshedpur:{id:"jamshedpur",x:302,y:200,label:"Jamshedpur",kind:"city",cityId:"jamshedpur",lx:28,ly:-4},
+  durgapur:{id:"durgapur",x:272,y:252,label:"Durgapur",kind:"hub",lx:24,ly:6},
+  kolkata:{id:"kolkata",x:308,y:312,label:"Kolkata",kind:"city",cityId:"kolkata",lx:18},
+  angul:{id:"angul",x:160,y:258,label:"Angul",kind:"hub"},
+  bhubaneswar:{id:"bhubaneswar",x:124,y:334,label:"Bhubaneswar",kind:"city",cityId:"bhubaneswar",lx:-10,ly:18},
+  cuttack:{id:"cuttack",x:196,y:310,label:"Cuttack",kind:"city",cityId:"cuttack",lx:26,ly:-4},
+  dhamra:{id:"dhamra",x:232,y:360,label:"Dhamra",kind:"hub",ly:16}
+};
+const CITIES=[
+  {id:"varanasi",name:"Varanasi",line:"The ghats wake. Autos move. Homes take flame.",acts:["CNG mobility","PNG homes","Restaurants"]},
+  {id:"patna",name:"Patna",line:"Riverfront offices, wards, and kitchens come online.",acts:["CNG mobility","Homes","Healthcare"]},
+  {id:"ranchi",name:"Ranchi",line:"The plateau city starts its morning shift.",acts:["Mobility","PNG","Industry"]},
+  {id:"jamshedpur",name:"Jamshedpur",line:"Furnaces hold temperature. Colonies stay warm.",acts:["Industry","Transport","Homes"]},
+  {id:"bhubaneswar",name:"Bhubaneswar",line:"Buses roll. Sectors light in sequence.",acts:["Public transport","PNG","Commercial"]},
+  {id:"cuttack",name:"Cuttack",line:"Markets open along the Mahanadi.",acts:["Mobility","Households","Markets"]},
+  {id:"kolkata",name:"Kolkata",line:"The eastern terminal city is fully live.",acts:["Transport","Homes","Industry"]}
+];
+const CITY=Object.fromEntries(CITIES.map(c=>[c.id,c]));
+const SLOTS=[
+  {id:"s1",piece:"city",from:"jagdishpur",to:"varanasi",cityId:"varanasi"},
+  {id:"s2",piece:"city",from:"varanasi",to:"patna",cityId:"patna"},
+  {id:"s3",piece:"junction",from:"patna",to:"bokaro"},
+  {id:"s4",piece:"turn",from:"bokaro",to:"ranchi",cityId:"ranchi"},
+  {id:"s5",piece:"turn",from:"bokaro",to:"jamshedpur",cityId:"jamshedpur"},
+  {id:"s6",piece:"city",from:"bokaro",to:"kolkata",cityId:"kolkata",extra:[["bokaro","durgapur"],["durgapur","kolkata"]]},
+  {id:"s7",piece:"straight",from:"bokaro",to:"angul",extra:[["angul","dhamra"]]},
+  {id:"s8",piece:"city",from:"angul",to:"bhubaneswar",cityId:"bhubaneswar"},
+  {id:"s9",piece:"city",from:"angul",to:"cuttack",cityId:"cuttack"}
+];
+const CHALLENGES=[
+  {id:"wah",name:"Wah Kya Energy Hai",brief:"Energize the complete challenge map.",cityTarget:7},
+  {id:"varanasi",name:"Energize Varanasi",brief:"Connect Varanasi in under 30 seconds.",cityTarget:1,timeLimitMs:30000},
+  {id:"east-run",name:"East India Energy Run",brief:"Connect 5 cities along the corridor.",cityTarget:5},
+  {id:"master",name:"Pipeline Master",brief:"Complete the network with no wrong connections.",cityTarget:7,noWrong:true}
+];
+const CITIZENS=[
+  {id:"home",label:"My Home",blurb:"PNG in the kitchen",bonus:400},
+  {id:"commute",label:"My Commute",blurb:"CNG on the move",bonus:400},
+  {id:"industry",label:"My Industry",blurb:"Steady furnace heat",bonus:400},
+  {id:"city",label:"My City",blurb:"Wards, buses, markets",bonus:400},
+  {id:"environment",label:"My Environment",blurb:"Cleaner air along the route",bonus:600}
+];
+const PIECES=[{id:"straight",label:"Straight"},{id:"turn",label:"Turn"},{id:"junction",label:"Junction"},{id:"city",label:"City"}];
+const POINTS={pipe:100,city:500,cgdNetwork:750,combo3:1000,completeRoute:2500,noWrong:1000,completeChallenge:5000};
+const LAND="M64 36C108 6 178 2 236 16C292 30 338 62 352 108C366 152 360 196 352 236C360 276 372 318 362 356C352 396 328 428 286 444C236 462 186 454 146 430C108 408 86 370 78 328C70 286 58 250 64 210C70 166 52 118 64 36Z";
+const RIVER="M160 18C172 64 208 104 236 142C264 180 252 224 270 264C288 304 314 336 338 372";
+const HANDLES=["UrjaStar","PipePilot","CitySpark","GangaFlow","EastGrid","CgdChamp","FlameLine","SteelSpark"];
+
+function n(id){return NODES[id]}
+function pathD(a,b){const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y;return `M ${a.x} ${a.y} Q ${mx-dy*.08} ${my+dx*.08} ${b.x} ${b.y}`}
+function badgeFor(cities,complete){
+  if(complete&&cities>=7) return {id:"master",name:"Wah Kya Energy Hai"};
+  if(cities>=5) return {id:"energizer",name:"City Energizer"};
+  if(cities>=3) return {id:"connector",name:"Pipeline Connector"};
+  if(cities>=1) return {id:"starter",name:"Energy Starter"};
+  return {id:"none",name:"Energy Connector"};
+}
+function impact(pct){return pct>=100?"India is energized":pct>=75?"Life is getting energized":pct>=50?"Cities are waking up":pct>=25?"Energy is moving":"Network waiting"}
+function fmt(ms){const s=Math.max(0,Math.floor(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
+const LOGO=`<svg class="logo" viewBox="0 0 256 256" aria-label="GAIL"><circle cx="128" cy="128" r="120" fill="#FFD94F" stroke="#E63746" stroke-width="10"/><text x="128" y="52" text-anchor="middle" font-family="Noto Sans Devanagari,serif" font-size="26" font-weight="700" fill="#1a1a1a">गेल</text><path d="M176 112c-6-24-26-42-52-42-32 0-56 24-56 58s24 58 56 58c24 0 44-14 52-36" fill="none" stroke="#1a1a1a" stroke-width="24"/><path d="M124 132h56" stroke="#1a1a1a" stroke-width="18"/><g transform="translate(158 74) rotate(-20)"><rect width="44" height="11" rx="1" fill="#E63746"/><rect x="7" y="16" width="44" height="11" rx="1" fill="#E63746"/><rect x="14" y="32" width="44" height="11" rx="1" fill="#E63746"/></g><text x="128" y="228" text-anchor="middle" font-family="Rajdhani,sans-serif" font-size="26" font-weight="700" fill="#1a1a1a" letter-spacing="5">GAIL</text></svg>`;
+function pieceSvg(type,stroke="#ffd94f"){
+  const s=`stroke="${stroke}" fill="none" stroke-width="4" stroke-linecap="round"`;
+  if(type==="straight") return `<svg viewBox="0 0 48 28"><path ${s} d="M4 14h40"/></svg>`;
+  if(type==="turn") return `<svg viewBox="0 0 48 28"><path ${s} d="M6 22 V12 Q6 6 16 6 H42"/></svg>`;
+  if(type==="junction") return `<svg viewBox="0 0 48 28"><path ${s} d="M4 14h40M24 4v20"/></svg>`;
+  return `<svg viewBox="0 0 48 28"><circle cx="40" cy="14" r="6" fill="${stroke}" opacity=".9"/><path ${s} d="M4 14h28"/></svg>`;
+}
+
+let actx=null;
+function beep(freq,dur,type="sine",gain=.05){
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.value=gain;
+    o.connect(g);g.connect(actx.destination);o.start();
+    g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+dur);o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+function unlock(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}}
+
+const S={
+  screen:"title", challengeId:"wah", citizen:null, nextIndex:0, connected:[], citiesOn:[],
+  score:0, combo:0, wrong:0, elapsed:0, running:false, reveal:null, selected:null,
+  cgd:false, combo3:false, pending:null, high:0, result:null, feedback:null, pulse:null
+};
+try{S.high=+(JSON.parse(localStorage.getItem("gail-energy-connect-v1")||"{}").highScore||0)}catch(e){}
+
+function challenge(){return CHALLENGES.find(c=>c.id===S.challengeId)||CHALLENGES[0]}
+function evaluate(){
+  const ch=challenge();
+  if(ch.timeLimitMs && S.citiesOn.length<ch.cityTarget && S.elapsed>=ch.timeLimitMs)
+    return {won:false,reason:"Time is up. The corridor is still waiting."};
+  const mapDone=S.nextIndex>=SLOTS.length;
+  if(S.citiesOn.length>=ch.cityTarget){
+    if(ch.noWrong && S.wrong>0) return mapDone?{won:false,reason:"A wrong connection cost the master run."}:null;
+    if(ch.cityTarget<7) return {won:true,reason:"Network live."};
+    if(mapDone) return {won:true,reason:"The eastern corridor is live."};
+  }
+  if(mapDone && S.citiesOn.length<ch.cityTarget) return {won:false,reason:"The map is laid, but the challenge is unfinished."};
+  return null;
+}
+function empty(){
+  Object.assign(S,{nextIndex:0,connected:[],citiesOn:[],score:0,combo:0,wrong:0,elapsed:0,running:false,
+    reveal:null,selected:null,cgd:false,combo3:false,pending:null,feedback:null,pulse:null,result:null});
+}
+function startRun(){
+  empty(); S.running=true; S.screen="play";
+  const c=CITIZENS.find(x=>x.id===S.citizen); if(c) S.score+=c.bonus;
+  render(); loop();
+}
+function finish(won,reason){
+  if(S.screen==="results") return;
+  S.running=false;
+  const ch=challenge();
+  if(won && S.citiesOn.length>=7) S.score+=POINTS.completeRoute;
+  if(won && S.wrong===0) S.score+=POINTS.noWrong;
+  if(won) S.score+=POINTS.completeChallenge;
+  const badge=badgeFor(S.citiesOn.length,won);
+  S.result={score:S.score,cities:S.citiesOn.length,elapsed:S.elapsed,badge:badge.name,won,reason,challengeId:ch.id};
+  if(S.score>S.high){S.high=S.score; try{localStorage.setItem("gail-energy-connect-v1",JSON.stringify({highScore:S.high}))}catch(e){}}
+  S.screen="results"; render();
+  beep(won?523:.2,.12,won?"triangle":"sawtooth",.06);
+  if(won){setTimeout(()=>beep(659,.12,"triangle",.06),90);setTimeout(()=>beep(784,.2,"triangle",.07),180)}
+}
+function tryPlace(piece){
+  if(!S.running||S.reveal||S.pending) return;
+  const slot=SLOTS[S.nextIndex]; if(!slot) return;
+  if(piece!==slot.piece){
+    S.wrong++; S.combo=0; S.feedback="Check the route."; S.selected=null; beep(180,.12,"square",.05);
+    render(); setTimeout(()=>{S.feedback=null; render()},1200);
+    const after=evaluate(); if(after && after.won===false && S.nextIndex>=SLOTS.length) finish(false,after.reason);
+    return;
+  }
+  beep(440,.08,"sine",.05); setTimeout(()=>beep(660,.1,"sine",.04),70);
+  S.connected.push(slot.id); S.score+=POINTS.pipe; S.combo++;
+  if(S.combo===3 && !S.combo3){S.score+=POINTS.combo3; S.combo3=true; S.feedback="Combo ×3"}
+  else if(S.combo>=5) S.feedback="Energy combo";
+  if(slot.cityId && !S.citiesOn.includes(slot.cityId)){
+    S.citiesOn.push(slot.cityId); S.score+=POINTS.city; S.reveal=slot.cityId; beep(784,.18,"triangle",.07);
+  }
+  if(!S.cgd && S.citiesOn.length>=5){S.score+=POINTS.cgdNetwork; S.cgd=true}
+  S.pulse=slot.id; S.nextIndex++; S.selected=null;
+  const pending=evaluate();
+  if(S.reveal){ S.pending=pending; render(); setTimeout(()=>{ S.reveal=null; if(S.pending) finish(S.pending.won,S.pending.reason); else render(); },1800); return; }
+  if(pending) finish(pending.won,pending.reason); else render();
+}
+
+let raf=0,last=0;
+function loop(now){
+  if(!S.running||S.screen!=="play") return;
+  if(now){ const dt=Math.min(.1,(now-last)/1000||0); last=now; if(!S.reveal){ S.elapsed+=dt*1000; const o=evaluate(); if(o) return finish(o.won,o.reason);} }
+  raf=requestAnimationFrame(loop);
+  if(S.screen==="play" && !S.reveal){
+    const t=document.getElementById("timer"); if(t) t.textContent=fmt(S.elapsed);
+  }
+}
+
+function wordmark(compact){
+  return `<div class="row">${LOGO}<div><p class="muted" style="font-family:Rajdhani;font-size:.7rem;font-weight:700;letter-spacing:.22em;margin:0">GAIL</p>
+    <h1 style="font-size:${compact?"1.15rem":"1.5rem"}">Energy Connect</h1>
+    <p class="muted" style="font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:.1rem 0 0">Jodo Pipeline. Jagao Shehar.</p></div></div>`;
+}
+
+function title(){
+  return `<section class="screen" style="padding:0">
+    <div class="hero"></div>
+    <div style="position:relative;display:flex;flex-direction:column;justify-content:space-between;height:100%;padding:var(--safe-t) 1.25rem var(--safe-b)">
+      ${wordmark()}
+      <div style="text-align:center">
+        <p class="kicker">Eastern India needs energy</p>
+        <h2 style="font-size:1.7rem;margin:.5rem 0 .4rem">Can you connect the network?</h2>
+        <p class="muted" style="font-size:.92rem">Drag the right pipe onto the JHBDPL corridor. When a city connects, life turns on.</p>
+      </div>
+      <div class="stack">
+        <button class="btn lg" id="go">Start connecting</button>
+        <button class="btn sec" id="ch">Challenges</button>
+        <p class="subtle" style="text-align:center;font-size:.75rem;margin:.4rem 0 0">JHBDPL · Pradhan Mantri Urja Ganga · Best ${S.high.toLocaleString("en-IN")}</p>
+      </div>
+    </div></section>`;
+}
+function citizen(){
+  return `<section class="screen">
+    ${wordmark(true)}
+    <p class="kicker" style="margin-top:1.4rem">Citizen mode</p>
+    <h2 style="font-size:1.6rem;margin:.35rem 0">Who do you want to energize?</h2>
+    <p class="muted" style="font-size:.9rem;margin-bottom:.8rem">The network is the same. Your bonus follows what you care about.</p>
+    <div class="stack" style="flex:1;overflow:auto">${CITIZENS.map(c=>`<button class="card" data-c="${c.id}"><b>${c.label}</b><div class="muted" style="font-size:.8rem">${c.blurb}</div><div class="kicker" style="margin-top:.3rem">+${c.bonus}</div></button>`).join("")}</div>
+    <button class="btn ghost" id="back">Back</button>
+  </section>`;
+}
+function challenges(){
+  return `<section class="screen">${wordmark(true)}
+    <p class="kicker" style="margin-top:1.4rem">Missions</p>
+    <h2 style="margin:.3rem 0 1rem">Pick a challenge</h2>
+    <div class="stack" style="flex:1;overflow:auto">${CHALLENGES.map(c=>`<button class="card" data-ch="${c.id}"><b>${c.name}</b><div class="muted" style="font-size:.82rem">${c.brief}</div></button>`).join("")}</div>
+    <button class="btn ghost" id="back">Back</button></section>`;
+}
+function mapSvg(){
+  const connected=new Set(S.connected);
+  const on=new Set(S.citiesOn);
+  let pipes="";
+  SLOTS.forEach((slot,i)=>{
+    const a=n(slot.from),b=n(slot.to),d=pathD(a,b);
+    const live=connected.has(slot.id);
+    const next=i===S.nextIndex;
+    pipes+=`<path d="${d}" fill="none" stroke="${live?"#ffd94f":"#3d3824"}" stroke-width="${live?5:3}" stroke-linecap="round" opacity="${live||next?1:.55}"/>`;
+    (slot.extra||[]).forEach(p=>{
+      pipes+=`<path d="${pathD(n(p[0]),n(p[1]))}" fill="none" stroke="${live?"#ffd94f":"#3d3824"}" stroke-width="${live?4:2.5}" stroke-linecap="round"/>`;
+    });
+    if(next){
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+      pipes+=`<circle class="ghost" cx="${mx}" cy="${my}" r="11" fill="none" stroke="#ffd94f" stroke-width="2"/>`;
+      pipes+=`<g transform="translate(${mx-18},${my-10})" opacity=".9">${pieceSvg(slot.piece,"#ffd94f")}</g>`;
+    }
+    if(S.pulse===slot.id){
+      pipes+=`<circle cx="${(a.x+b.x)/2}" cy="${(a.y+b.y)/2}" r="5" fill="#fff8d0"><animate attributeName="r" values="3;9;3" dur="1s" repeatCount="indefinite"/></circle>`;
+    }
+  });
+  let nodes="";
+  Object.values(NODES).forEach(nd=>{
+    const lit=nd.cityId && on.has(nd.cityId);
+    const lx=nd.x+(nd.lx||0), ly=nd.y+(nd.ly|| (nd.kind==="city"?-14:12));
+    nodes+=`<circle cx="${nd.x}" cy="${nd.y}" r="${nd.kind==="city"?7:4.5}" fill="${lit?"#ffd94f":"#2a3140"}" stroke="${lit?"#fff3b0":"#5c6573"}" stroke-width="1.5"/>`;
+    nodes+=`<text x="${lx}" y="${ly}" text-anchor="middle" fill="${lit?"#ffd94f":"#8b93a1"}" font-size="9" font-family="Rajdhani,sans-serif" font-weight="600">${nd.label}</text>`;
+  });
+  return `<svg class="map" viewBox="0 0 ${VIEW.w} ${VIEW.h}" role="img" aria-label="JHBDPL corridor">
+    <path d="${LAND}" fill="#141a24" stroke="#1e2633" stroke-width="1.5"/>
+    <path d="${RIVER}" fill="none" stroke="#1a2838" stroke-width="6" opacity=".7"/>
+    ${pipes}${nodes}</svg>`;
+}
+function play(){
+  const ch=challenge();
+  const pct=Math.round(S.citiesOn.length/CITIES.length*100);
+  const slot=SLOTS[S.nextIndex];
+  const city=S.reveal?CITY[S.reveal]:null;
+  return `<section class="screen" style="padding-left:0;padding-right:0;padding-bottom:0">
+    <div class="hud" style="padding:0 1rem">
+      <div style="flex:1">
+        <p class="muted" style="font-family:Rajdhani;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;margin:0">${ch.name}</p>
+        <div style="display:flex;justify-content:space-between;align-items:end">
+          <h2 style="font-size:1.6rem">${S.score.toLocaleString("en-IN")}</h2>
+          <span class="muted" id="timer">${fmt(S.elapsed)}</span>
+        </div>
+        <div class="meter" style="margin-top:.4rem"><i style="width:${pct}%"></i></div>
+        <p class="subtle" style="font-size:.72rem;margin:.25rem 0 0">${impact(pct)} · ${S.citiesOn.length}/7 cities</p>
+      </div>
+      <button class="btn ghost" id="quit" style="width:auto;padding:0 .4rem">✕</button>
+    </div>
+    <div id="mapbox" class="${S.feedback==="Check the route."?"shake":""}">${mapSvg()}
+      ${S.feedback?`<div class="toast">${S.feedback}</div>`:""}
+      ${city?`<div class="overlay">
+        <p class="kicker">City energized</p>
+        <h2 style="font-size:2rem;margin:.3rem 0">${city.name}</h2>
+        <div class="cityart"><div class="sky"></div><div class="glow"></div>
+          <img alt="" src="${CDN}/cities/${city.id}.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.85" onerror="this.remove()"/>
+        </div>
+        <p style="margin:.8rem 0 .4rem">${city.line}</p>
+        <p class="muted" style="font-size:.85rem">${city.acts.join(" · ")}</p>
+        <p class="kicker" style="margin-top:auto">Homes · Vehicles · Hospitals · Industry</p>
+      </div>`:""}
+    </div>
+    <p class="subtle" style="text-align:center;font-size:.72rem;margin:.2rem 0">${slot?`Next: ${slot.piece==="city"?"City connector":slot.piece}`:"Network complete"}</p>
+    <div class="tray" style="padding-left:.7rem;padding-right:.7rem">${PIECES.map(p=>`<button class="piece ${S.selected===p.id?"on":""}" data-p="${p.id}">${pieceSvg(p.id)}${`<small>${p.label}</small>`}</button>`).join("")}</div>
+  </section>`;
+}
+function results(){
+  const r=S.result; if(!r) return title();
+  return `<section class="screen" style="overflow:auto">
+    ${wordmark(true)}
+    <p class="kicker" style="margin-top:1.5rem">${r.won?"Wah kya energy hai":"Corridor unfinished"}</p>
+    <h2 style="font-size:2.6rem">${r.score.toLocaleString("en-IN")}</h2>
+    <p class="muted">${r.reason}</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1rem 0">
+      <div class="stat"><div class="subtle" style="font-size:.7rem">CITIES</div><div class="display" style="font-size:1.3rem">${r.cities}</div></div>
+      <div class="stat"><div class="subtle" style="font-size:.7rem">BADGE</div><div class="display" style="font-size:1.05rem">${r.badge}</div></div>
+      <div class="stat"><div class="subtle" style="font-size:.7rem">TIME</div><div class="display" style="font-size:1.3rem">${fmt(r.elapsed)}</div></div>
+      <div class="stat"><div class="subtle" style="font-size:.7rem">BEST</div><div class="display" style="font-size:1.3rem">${S.high.toLocaleString("en-IN")}</div></div>
+    </div>
+    <blockquote style="border-left:2px solid var(--gold);padding:.2rem 0 .2rem .8rem;margin:0 0 1rem;font-size:.92rem">I connected the network. I energized the city. Can you beat my score?</blockquote>
+    <div class="stack">
+      <button class="btn" id="share">Share card</button>
+      <button class="btn sec" id="dl">Download badge</button>
+      <button class="btn lg" id="again">Play again</button>
+      <button class="btn ghost" id="home">Home</button>
+    </div>
+  </section>`;
+}
+
+function render(){
+  const root=document.getElementById("app");
+  root.innerHTML=S.screen==="title"?title():S.screen==="citizen"?citizen():S.screen==="challenges"?challenges():S.screen==="play"?play():results();
+  bind();
+}
+function bind(){
+  const $=id=>document.getElementById(id);
+  $("go")?.addEventListener("click",()=>{unlock();S.screen="citizen";render()});
+  $("ch")?.addEventListener("click",()=>{S.screen="challenges";render()});
+  $("back")?.addEventListener("click",()=>{S.screen="title";render()});
+  $("home")?.addEventListener("click",()=>{S.screen="title";render()});
+  $("again")?.addEventListener("click",()=>{unlock();startRun()});
+  $("quit")?.addEventListener("click",()=>{S.running=false;S.screen="title";render()});
+  document.querySelectorAll("[data-c]").forEach(el=>el.addEventListener("click",()=>{S.citizen=el.dataset.c;unlock();startRun()}));
+  document.querySelectorAll("[data-ch]").forEach(el=>el.addEventListener("click",()=>{S.challengeId=el.dataset.ch;S.screen="citizen";render()}));
+  document.querySelectorAll("[data-p]").forEach(el=>el.addEventListener("click",()=>{
+    const p=el.dataset.p; S.selected=p; tryPlace(p);
+  }));
+  $("share")?.addEventListener("click",()=>share(false));
+  $("dl")?.addEventListener("click",()=>share(true));
+}
+
+async function paintCard(){
+  const r=S.result, w=1080,h=1350,c=document.createElement("canvas"); c.width=w;c.height=h;
+  const x=c.getContext("2d");
+  x.fillStyle="#07090e"; x.fillRect(0,0,w,h);
+  x.fillStyle="#ffd94f"; x.fillRect(70,180,8,980);
+  x.font="600 28px Outfit,sans-serif"; x.fillStyle="#f4f0e6"; x.fillText("GAIL ENERGY CONNECT",140,120);
+  x.font="500 22px Outfit,sans-serif"; x.fillStyle="#8b93a1"; x.fillText("JODO PIPELINE. JAGAO SHEHAR.",140,158);
+  x.font="700 92px Rajdhani,sans-serif"; x.fillStyle="#ffd94f"; x.fillText(String(r.score),140,360);
+  x.font="600 36px Rajdhani,sans-serif"; x.fillStyle="#f4f0e6"; x.fillText(r.badge,140,430);
+  x.font="500 28px Outfit,sans-serif"; x.fillStyle="#8b93a1";
+  x.fillText(`${r.cities} cities energized`,140,510);
+  x.fillStyle="#f4f0e6"; x.font="500 30px Outfit,sans-serif";
+  x.fillText("I connected the network.",140,640);
+  x.fillText("I energized the city.",140,690);
+  x.fillText("Can you beat my score?",140,740);
+  x.font="600 24px Rajdhani,sans-serif"; x.fillStyle="#e63746";
+  x.fillText("#WahKyaEnergyHai",140,1180);
+  x.fillStyle="#8b93a1"; x.fillText("Pradhan Mantri Urja Ganga",140,1230);
+  return new Promise(res=>c.toBlob(res,"image/png"));
+}
+async function share(download){
+  const blob=await paintCard();
+  const file=new File([blob],"gail-energy-connect.png",{type:"image/png"});
+  const text=`I connected the network. I energized the city.\nEnergy score ${S.result.score} · ${S.result.cities} cities · ${S.result.badge}\nPlay: https://rajeshkrj-arch.github.io/gail/\n#WahKyaEnergyHai`;
+  if(download){
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=file.name; a.click(); return;
+  }
+  try{
+    if(navigator.share && navigator.canShare?.({files:[file]})){ await navigator.share({title:"GAIL Energy Connect",text,files:[file]}); return; }
+    if(navigator.share){ await navigator.share({title:"GAIL Energy Connect",text}); return; }
+    await navigator.clipboard.writeText(text); alert("Score copied. Paste it into WhatsApp or X.");
+  }catch(e){}
+}
+
+render();
+</script>
+</body>
+</html>
